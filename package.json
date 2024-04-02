@@ -1,27 +1,22 @@
 {
-  "name": "contrast-js",
-  "version": "0.0.3",
-  "description": "Contrast.js is a tiny (4.26kb) library with no dependencies that adds responsiveness to the color or background attributes of DOM elements based on the section of background image behind the target element. The library analyzes the background behind the bounding box of the target element by getting the average RGB values of pixels in the sub-rectangle behind the element and finding the best contrasting color. In simple words, never worry about your color matching the background image again! No more countless media queries.",
-  "main": "contrast.js",
-  "directories": {
-  },
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/MishaPetrov/Contrast.js.git"
-  },
-  "keywords": [
-    "contrast",
-    "responsive",
-    "color",
-    "contrast.js"
-  ],
-  "author": "Misha Petrov",
-  "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/MishaPetrov/Contrast.js/issues"
-  },
-  "homepage": "https://github.com/MishaPetrov/Contrast.js#readme"
+	"name": "contrast-js",
+	"version": "0.0.3",
+	"description": "Contrast.js is a tiny library with no dependencies that adds responsiveness to the color or background attributes of DOM elements based on the section of background image behind the target element. The library analyzes the background behind the bounding box of the target element by getting the average RGB values of pixels in the sub-rectangle behind the element and finding the best contrasting color. In simple words, never worry about your color matching the background image again! No more countless media queries.",
+	"author": "Misha Petrov",
+	"license": "MIT",
+	"homepage": "https://github.com/victrme/Contrast.js",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/victrme/contrast.js.git"
+	},
+	"keywords": [
+		"contrast",
+		"responsive",
+		"color",
+		"contrast.js"
+	],
+	"scripts": {
+		"dev": "npx http-server -c-1",
+		"build": "tsc"
+	}
 }
