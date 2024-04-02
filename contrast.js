@@ -1,28 +1,41 @@
-// This is an example of how it's possible to dynamically change the font color
-// based on the page or element background - including responsive BG image.
-
-// (You can also set bw value to true like invertColor(hex, true) and in this case
-// the font color will switch between black/white or any color pair you set based on
-// the background behind the target element)
-
 // It is inspired by https://stackoverflow.com/questions/2541481/get-average-color-of-image-via-javascript
 // and the following npm package https://github.com/onury/invert-color
 // As well as CS50's image filter project and
 // https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/drawImage
 
-// Developed by @devmishka at FictionTribe
-
+/**
+ * This is an example of how it's possible to dynamically change the font color
+ * based on the page or element background, including responsive images.
+ *
+ * (You can also set bw value to true like invertColor(hex, true) and in this case
+ * the font color will switch between black/white or any color pair you set based on
+ * the background behind the target element)
+ *
+ * @author devmishka
+ * @license MIT
+ */
 export default class Contrast {
+	/**
+	 * @param {Object} options
+	 * @param {string} options.bgClass - The class of the element containing bg image
+	 * @param {string} options.elementClass - The class of the target element
+	 * @param {"cover" | "100%"} options.backgroundSize - "cover" or "100%" based on the background-size property in css
+	 * @param {boolean?} options.isCustomColors - If you want to prebuild light/dark colors
+	 * @param {string?} options.customLight - Light color HEX if isCustomColors is set to true
+	 * @param {string?} options.customDark - Dark color HEX if isCustomColors is set to true
+	 * @param {boolean?} options.isDiv - If the element is a div (to change it's background)
+	 * @param {boolean?} options.isResponsive - Turn this so the module runs on window resize
+	 */
 	constructor(options) {
 		options = options || {}
-		this.isCustomColors = typeof options.isCustomColors !== 'undefined' ? options.isCustomColors : false
-		this.customLight = typeof options.customLight !== 'undefined' ? options.customLight : '#FFFFFF'
-		this.customDark = typeof options.customDark !== 'undefined' ? options.customDark : '#000000'
-		this.isDiv = typeof options.isDiv !== 'undefined' ? options.isDiv : false
-		this.isResponsive = typeof options.isResponsive !== 'undefined' ? options.isResponsive : true
-		this.bgClass = typeof options.bgClass !== 'undefined' ? options.bgClass : 'contrast-bg'
-		this.elementClass = typeof options.elementClass !== 'undefined' ? options.elementClass : 'contrast-el'
-		this.backgroundSize = typeof options.backgroundSize !== 'undefined' ? options.backgroundSize : 'cover'
+		this.bgClass = options.bgClass
+		this.elementClass = options.elementClass
+		this.isCustomColors = options.isCustomColors ?? false
+		this.customLight = options.customLight ?? '#FFFFFF'
+		this.customDark = options.customDark ?? '#000000'
+		this.isDiv = options.isDiv ?? false
+		this.isResponsive = options.isResponsive ?? true
+		this.backgroundSize = options.backgroundSize ?? 'cover'
 		this.rgb = { r: 0, g: 0, b: 0 }
 		this.blockSize = 5 // only check every 5 pixels
 		this.defaultRGB = { r: 0, g: 0, b: 0 } // for non-supporting envs
@@ -245,7 +258,7 @@ export default class Contrast {
 		window.addEventListener('resize', function () {
 			self.prepare()
 				.loadImage()
-				.then((image) => {
+				.then((_) => {
 					self.getAverageHEX().rgbToHex().invertColor().setElementColor()
 				})
 		})
@@ -256,7 +269,7 @@ export default class Contrast {
 
 		this.prepare()
 			.loadImage()
-			.then((image) => {
+			.then((_) => {
 				self.getAverageHEX().rgbToHex().invertColor().setElementColor()
 			})
 
@@ -265,19 +278,3 @@ export default class Contrast {
 		}
 	}
 }
-
-// Let's test this
-// Background-position isn't supported yet
-
-// let contrast = new Contrast({
-// 	isCustomColors: false, // Set to true if you want to prebuild light/dark colors
-// 	customLight: '#bddfe0', // dark color HEX if isCustomColors is set to true
-// 	customDark: '#334054', // light color HEX if isCustomColors is set to true
-// 	backgroundSize: 'cover', // "cover" or "100%" based on the background-size property in css
-// 	bgClass: 'contrast-bg', // Option to rename the class for the element containing bg image
-// 	elementClass: 'contrast-el', // Option to rename the class for the target element
-// 	isDiv: false, // Set to true if the element is a div (to change it's background)
-// 	isResponsive: true, // Turn this so the module runs on window resize
-// })
-
-// contrast.launch()
