@@ -16,26 +16,24 @@
  */
 export default class Contrast {
 	/**
+	 * @param {string} container - A CSS selector for the element containing the image
+	 * @param {string} target - A CSS selector for the target element
 	 * @param {Object} options
-	 * @param {string} options.bgClass - The class of the element containing bg image
-	 * @param {string} options.elementClass - The class of the target element
-	 * @param {"cover" | "100%"} options.backgroundSize - "cover" or "100%" based on the background-size property in css
-	 * @param {boolean?} options.isCustomColors - If you want to prebuild light/dark colors
-	 * @param {string?} options.customLight - Light color HEX if isCustomColors is set to true
-	 * @param {string?} options.customDark - Dark color HEX if isCustomColors is set to true
-	 * @param {boolean?} options.isDiv - If the element is a div (to change it's background)
-	 * @param {boolean?} options.isResponsive - Turn this so the module runs on window resize
+	 * @param {boolean} options.once - The module runs only once; on window resize by default
+	 * @param {boolean} options.backgroundColor - Apply contrast to background color; font color by default
+	 * @param {"cover" | "contain"} options.backgroundSize - Based on the background-size property in css
+	 * @param {Object} options.theme - If you want to prebuild light & dark colors
+	 * @param {string} options.theme.light - Light color HEX
+	 * @param {string} options.theme.dark - Dark color HEX
 	 */
-	constructor(options) {
-		options = options || {}
-		this.bgClass = options.bgClass
-		this.elementClass = options.elementClass
-		this.isCustomColors = options.isCustomColors ?? false
-		this.customLight = options.customLight ?? '#FFFFFF'
-		this.customDark = options.customDark ?? '#000000'
-		this.isDiv = options.isDiv ?? false
-		this.isResponsive = options.isResponsive ?? true
+	constructor(container, target, options = {}) {
+		this.containerSelector = container
+		this.targetSelector = target
+		this.theme = options.theme
+		this.once = options.once ?? false
 		this.backgroundSize = options.backgroundSize ?? 'cover'
+		this.backgroundColor = options.backgroundColor ?? false
+
 		this.rgb = { r: 0, g: 0, b: 0 }
 		this.blockSize = 5 // only check every 5 pixels
 		this.defaultRGB = { r: 0, g: 0, b: 0 } // for non-supporting envs
@@ -43,9 +41,6 @@ export default class Contrast {
 		this.invertedHex
 		this.canvas
 		this.context
-		this.width
-		this.height
-		this.length
 		this.imgEl
 		this.imgSrc
 		this.contentEl
@@ -53,11 +48,11 @@ export default class Contrast {
 	}
 
 	prepare() {
-		this.contentEl = document.querySelector('.' + this.elementClass)
-		this.contentElBox = document.querySelector('.' + this.elementClass).getBoundingClientRect()
-		this.bgBlock = document.querySelector('.' + this.bgClass)
+		this.contentEl = document.querySelector(this.targetSelector)
+		this.contentElBox = document.querySelector(this.targetSelector).getBoundingClientRect()
+		this.bgBlock = document.querySelector(this.containerSelector)
 		this.canvas = document.createElement('canvas')
-		this.context = this.canvas.getContext && this.canvas.getContext('2d')
+		this.context = this.canvas.getContext('2d', { willReadFrequently: !this.once, alpha: false })
 		return this
 	}
 
@@ -208,13 +203,12 @@ export default class Contrast {
 			g = parseInt(this.hex.slice(2, 4), 16),
 			b = parseInt(this.hex.slice(4, 6), 16)
 
-		if (this.isCustomColors == true) {
-			// http://stackoverflow.com/a/3943023/112731
-			if (r * 0.299 + g * 0.587 + b * 0.114 > 186) {
-				this.invertedHex = this.customDark
-			} else {
-				this.invertedHex = this.customLight
-			}
+		if (this.theme) {
+			const threshold = r * 0.299 + g * 0.587 + b * 0.114 > 186 // https://stackoverflow.com/a/3943023/112731
+			const light = this.theme.light ?? '#FFFFFF'
+			const dark = this.theme.dark ?? '#000000'
+
+			this.invertedHex = threshold ? dark : light
 
 			return this
 		}
@@ -244,37 +238,25 @@ export default class Contrast {
 
 	// Change the color
 	setElementColor() {
-		if (this.isDiv) {
-			this.contentEl.style.background = this.invertedHex
+		if (this.backgroundColor) {
+			this.contentEl.style.backgroundColor = this.invertedHex
 		} else {
 			this.contentEl.style.color = this.invertedHex
 		}
 	}
 
-	// Add event listener
-	resize() {
-		let self = this
+	async apply() {
+		this.prepare()
+		await this.loadImage()
+		this.getAverageHEX().rgbToHex().invertColor().setElementColor()
+	}
 
-		window.addEventListener('resize', function () {
-			self.prepare()
-				.loadImage()
-				.then((_) => {
-					self.getAverageHEX().rgbToHex().invertColor().setElementColor()
-				})
-		})
+	resize() {
+		window.addEventListener('resize', () => this.apply())
 	}
 
 	launch() {
-		let self = this
-
-		this.prepare()
-			.loadImage()
-			.then((_) => {
-				self.getAverageHEX().rgbToHex().invertColor().setElementColor()
-			})
-
-		if (this.isResponsive) {
-			this.resize()
-		}
+		if (!this.once) this.resize()
+		this.apply()
 	}
 }

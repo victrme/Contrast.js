@@ -34,15 +34,11 @@
 	<script type="module">
 		import Contrast from './contrast.js'
 
-		new Contrast({
-			bgClass: 'contrast-bg',
-			elementClass: 'contrast-el',
-			backgroundSize: 'cover',
-			isDiv: false,
-			isResponsive: true,
-			isCustomColors: false,
-			customLight: '#bddfe0',
-			customDark: '#334054',
+		new Contrast('.contrast-bg', '.contrast-el', {
+			// colors: {
+			// 	light: '#bddfe0',
+			// 	dark: '#334054',
+			// }
 		}).launch()
 	</script>
 </html>
