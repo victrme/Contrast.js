@@ -1,4 +1,4 @@
-![Contrast.js logo](https://raw.githubusercontent.com/victrme/Contrast.js/master/img/logo.png)
+![Contrast.js logo](https://raw.githubusercontent.com/victrme/Contrast.js/master/assets/logo.png)
 ============
 
 This is a ESM port of Contrast.js which is a tiny library with no dependencies that adds responsiveness to the color or background attributes of DOM elements based on the section of background image behind the target element.
