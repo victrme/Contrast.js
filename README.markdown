@@ -1,23 +1,19 @@
-![Contrast.js logo](https://mishapetrov.github.io/Contrast.js/img/logo.png)
+![Contrast.js logo](https://raw.githubusercontent.com/victrme/Contrast.js/master/img/logo.png)
 ============
-![npm](https://img.shields.io/npm/v/contrast-js?color=green&style=flat-square) [![GitHub Size](https://img.shields.io/github/size/MishaPetrov/Contrast.js/contrast.min.js?color=%23ff5757&style=flat-square)](https://github.com/mishapetrov/Contrast.js/contrast.min.js) ![GitHub issues](https://img.shields.io/github/issues/mishapetrov/Contrast.js?style=flat-square) [![GitHub stars](https://img.shields.io/github/stars/mishapetrov/Contrast.js?style=flat-square)](https://github.com/mishapetrov/Contrast.js) [![Live Demo](https://img.shields.io/badge/demo-online-blueviolet?style=flat-square)](https://mishapetrov.github.io/Contrast.js/example/)
 
-Contrast.js is a tiny (4.26kb) library with no dependencies that adds responsiveness to the color or background attributes of DOM elements based on the section of background image behind the target element.
+This is a ESM port of Contrast.js which is a tiny library with no dependencies that adds responsiveness to the color or background attributes of DOM elements based on the section of background image behind the target element.
 The library analyzes the background behind the bounding box of the target element by getting the average RGB values of pixels in the sub-rectangle behind the element and finding the best contrasting color.
 
 In simple words, never worry about your color matching the background image again! No more countless media queries.
 
 ![GIF demo](img/demo-2.gif)
 
----
 
-## Buy me a coffee
+## Buy mishka a coffee
 
-Whether you use this project, have learned something from it, or just like it, please consider supporting it by buying me a coffee, so I can dedicate more time on open-source projects like this :)
+Whether you use this project, have learned something from it, or just like it, please consider supporting it by buying mishka a coffee, so that he can dedicate more time on open-source projects like this :)
 
 <a href="https://www.buymeacoffee.com/mishka" target="_blank"><img src="https://www.buymeacoffee.com/assets/img/guidelines/download-assets-sm-1.svg" alt="Buy Me A Coffee" style="height: auto !important;width: auto !important;" ></a>
-
----
 
 ## Features
 - Vanilla JS - no jQuery or any other dependencies
@@ -29,8 +25,6 @@ Whether you use this project, have learned something from it, or just like it, p
 - Option to add custom colors to switch between (Light/Dark)
 - Option to change activation class names
 - Option to turn on/off activation on window resize event
-
----
 
 ## Install
 To start working with Contrast.js right away, just add this line before your closing <body> tag:
@@ -47,8 +41,6 @@ $ npm install contrast-js
 ```html
 <script src="contrast.min.js"></script>
 ```
-
----
 
 ## Run
 Add `contrast-bg` and `contrast-el` classes to the element that has the background image and the target element, respectively like this:
@@ -101,19 +93,13 @@ let contrast = new Contrast({
 contrast.launch();
 ```
 
----
-
 ## What's not there yet
 - Currently the library supports changing color for only ONE element.
 - background-position isn't supported yet
 
----
-
 ## Proud to mention
-<img alt="FictionTribe Logo" src="https://mishapetrov.github.io/Contrast.js/img/ft-logo.png" width="100">  
 Created at <a style="color:#52337c;" href="https://fictiontribe.com">Fiction Tribe ®</a> in Portland, OR
 
----
 
 ## License
 >You can check out the full license [here](https://github.com/mishapetrov/Contrast.js/LICENSE)
