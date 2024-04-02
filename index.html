@@ -31,9 +31,9 @@
 		</section>
 	</body>
 
-	<script src="./contrast.js"></script>
+	<script type="module">
+		import Contrast from './contrast.js'
 
-	<script defer>
 		new Contrast({
 			isCustomColors: false, // Set to true if you want to prebuild light/dark colors
 			customLight: '#bddfe0', // dark color HEX if isCustomColors is set to true

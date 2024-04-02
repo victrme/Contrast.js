@@ -12,7 +12,7 @@
 
 // Developed by @devmishka at FictionTribe
 
-class Contrast {
+export default class Contrast {
 	constructor(options) {
 		options = options || {}
 		this.isCustomColors = typeof options.isCustomColors !== 'undefined' ? options.isCustomColors : false
