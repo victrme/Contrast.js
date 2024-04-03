@@ -51,8 +51,11 @@ export default class Contrast {
 		this.target = document.querySelector(this.targetSelector)
 		this.targetBox = document.querySelector(this.targetSelector).getBoundingClientRect()
 		this.container = document.querySelector(this.containerSelector)
-		this.canvas = document.createElement('canvas')
-		this.context = this.canvas.getContext('2d', { willReadFrequently: !this.once, alpha: false })
+
+		if (!this.canvas || !this.context) {
+			this.canvas = document.createElement('canvas')
+			this.context = this.canvas.getContext('2d', { willReadFrequently: !this.once, alpha: false })
+		}
 	}
 
 	/**
@@ -212,22 +215,27 @@ export default class Contrast {
 		}
 	}
 
-	async apply() {
+	resize() {
+		window.addEventListener('resize', () => {
+			this.prepare()
+			this.getAverageRgb()
+			this.rgbToHex()
+			this.invertColor()
+			this.setElementColor()
+		})
+	}
+
+	async launch() {
 		this.prepare()
 		await this.loadImage()
 		this.getAverageRgb()
 		this.rgbToHex()
 		this.invertColor()
 		this.setElementColor()
-	}
 
-	resize() {
-		window.addEventListener('resize', () => this.apply())
-	}
-
-	launch() {
-		if (!this.once) this.resize()
-		this.apply()
+		if (!this.once) {
+			this.resize()
+		}
 	}
 
 	//
