@@ -45,7 +45,7 @@ Add an element that has the background image and a target element, like this:
 
 ```html
 <div class="contrast-bg">
-    <h1 class="contrast-el">Resize and watch my color change</h1>
+  <h1 class="contrast-el">Resize and watch my color change</h1>
 </div>
 ```
 
@@ -63,17 +63,17 @@ Contrast also accepts options:
 import Contrast from 'contrast-js'
 
 const contrast = new Contrast(
-    ".background",     // The CSS selector for the element containing the image
-    ".target",         // The CSS selector for the target element
-    {
-        once: true                   // The module runs only once; on window resize by default
-        backgroundSize: "cover",     // "cover" or "contain" based on the background-size property in css
-        backgroundColor: false,      // Apply contrast to background color; font color by default
-        theme: {                     // If you want to prebuild light & dark colors
-            light: "#bddfe0",        // Light color HEX
-            dark: "#334054"          // Dark color HEX
-        },
-    }
+  ".background",   // The CSS selector for the element containing the image
+  ".target",       // The CSS selector for the target element
+  {
+    once: true,               // The module runs only once; on window resize by default
+    backgroundSize: "cover",  // "cover" or "contain" based on the background-size property in css
+    backgroundColor: false,   // Apply contrast to background color; font color by default
+    theme: {                  // If you want to prebuild light & dark colors
+      light: "#bddfe0",       // Light color HEX
+      dark: "#334054"         // Dark color HEX
+    },
+  }
 );
 
 contrast.launch();
@@ -88,7 +88,7 @@ contrast.launch();
 
 Created at <a style="color:#52337c;" href="https://fictiontribe.com">Fiction Tribe ®</a> in Portland, OR
 
-## License$
+## License
 
 > You can check out the full license [here](https://github.com/victrme/Contrast.js/LICENSE.md)
 
