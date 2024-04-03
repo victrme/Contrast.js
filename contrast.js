@@ -41,26 +41,26 @@ export default class Contrast {
 		this.invertedHex
 		this.canvas
 		this.context
-		this.imgEl
-		this.imgSrc
-		this.contentEl
-		this.contentElBox
+		this.image
+		this.target
+		this.targetBox
+		this.container
 	}
 
 	prepare() {
-		this.contentEl = document.querySelector(this.targetSelector)
-		this.contentElBox = document.querySelector(this.targetSelector).getBoundingClientRect()
-		this.bgBlock = document.querySelector(this.containerSelector)
+		this.target = document.querySelector(this.targetSelector)
+		this.targetBox = document.querySelector(this.targetSelector).getBoundingClientRect()
+		this.container = document.querySelector(this.containerSelector)
 		this.canvas = document.createElement('canvas')
 		this.context = this.canvas.getContext('2d', { willReadFrequently: !this.once, alpha: false })
-		return this
 	}
 
-	// Function that loads Image dynamically from the CSS background-image value
-	// RETURNS A PROMISE
-	loadImage() {
-		// Let's create an image to draw from
-		let style = getComputedStyle(this.bgBlock)
+	/**
+	 * Loads image dynamically from the CSS background-image value
+	 */
+	async loadImage() {
+		const style = getComputedStyle(this.container)
+		let imageSrc = ''
 
 		// Find css background-image property and check whether it has url wrapped
 		// in "" or '' or without quotes, then extract it
@@ -73,49 +73,29 @@ export default class Contrast {
 				startOfString = 4
 				endOfString = style.backgroundImage.indexOf(')')
 			}
-			this.imgSrc = style.backgroundImage.slice(startOfString, endOfString)
+			imageSrc = style.backgroundImage.slice(startOfString, endOfString)
 		} else {
 			console.log("Check your element styles. Looks like you haven't set the background-image property correctly.")
 		}
 
-		// Make sure the image is loaded before calling the next function
-		return new Promise((resolve, reject) => {
-			this.imgEl = new Image()
-			this.imgEl.crossOrigin = 'anonymous'
-			this.imgEl.onload = () => resolve(this.imgEl)
-			this.imgEl.onerror = reject
-			this.imgEl.src = this.imgSrc
+		await new Promise((resolve, reject) => {
+			this.image = new Image()
+			this.image.crossOrigin = 'anonymous'
+			this.image.onload = resolve
+			this.image.onerror = reject
+			this.image.src = imageSrc
 		})
 	}
 
-	// This function is used to assist with background-size:cover
-	getCoverScaleFactor() {
-		// Get the ratio of the div + the image
-		let imageRatio = this.imgEl.width / this.imgEl.height
-		let coverRatio = this.bgBlock.offsetWidth / this.bgBlock.offsetHeight
-		let coverHeight, coverWidth, scale
-
-		// Figure out which ratio is greater
-		if (imageRatio >= coverRatio) {
-			coverHeight = this.bgBlock.offsetHeight
-			scale = coverHeight / this.imgEl.height
-			coverWidth = this.imgEl.width * scale
-		} else {
-			coverWidth = this.bgBlock.offsetWidth
-			scale = coverWidth / this.imgEl.width
-			coverHeight = this.imgEl.height * scale
-		}
-
-		return scale
-	}
-
-	// Function that returns the average color of the section of the
-	// background image right under the supplied element
-	// using the target element's bounding box
-	getAverageHEX() {
+	/**
+	 * Determines the average color of the section of the
+	 * background image right under the supplied element
+	 * using the target element's bounding box
+	 */
+	getAverageRgb() {
 		if (!this.context) {
 			console.log('CONTEXT UNDEFINED')
-			return defaultRGB
+			return
 		}
 
 		let revScale
@@ -126,41 +106,41 @@ export default class Contrast {
 
 			// Let's draw the area of the image behind the text (contentEL)
 			this.context.drawImage(
-				this.imgEl,
-				this.contentElBox.left / revScale,
-				this.contentElBox.top / revScale,
-				this.contentElBox.width / revScale,
-				this.contentElBox.height / revScale,
+				this.image,
+				this.targetBox.left / revScale,
+				this.targetBox.top / revScale,
+				this.targetBox.width / revScale,
+				this.targetBox.height / revScale,
 				0,
 				0,
-				this.contentElBox.width,
-				this.contentElBox.height
+				this.targetBox.width,
+				this.targetBox.height
 			)
 		} else {
 			// Let's find the reverse scale factor of the image
 			// so we can multiply our bounding box coordinates by it
-			revScale = this.imgEl.naturalWidth / this.bgBlock.clientWidth
+			revScale = this.image.naturalWidth / this.container.clientWidth
 
 			// Let's draw the area of the image behind the text (contentEL)
 			this.context.drawImage(
-				this.imgEl,
-				this.contentElBox.left * revScale,
-				this.contentElBox.top * revScale,
-				this.contentElBox.width * revScale,
-				this.contentElBox.height * revScale,
+				this.image,
+				this.targetBox.left * revScale,
+				this.targetBox.top * revScale,
+				this.targetBox.width * revScale,
+				this.targetBox.height * revScale,
 				0,
 				0,
-				this.contentElBox.width,
-				this.contentElBox.height
+				this.targetBox.width,
+				this.targetBox.height
 			)
 		}
 
 		try {
-			this.data = this.context.getImageData(0, 0, this.contentElBox.width, this.contentElBox.height)
+			this.data = this.context.getImageData(0, 0, this.targetBox.width, this.targetBox.height)
 		} catch (e) {
 			// security error, img on diff domain
 			console.log('Make sure the image is hosted on the same domain')
-			return this
+			return
 		}
 
 		this.length = this.data.data.length
@@ -178,13 +158,13 @@ export default class Contrast {
 		this.rgb.r = ~~(this.rgb.r / count)
 		this.rgb.g = ~~(this.rgb.g / count)
 		this.rgb.b = ~~(this.rgb.b / count)
-
-		return this
 	}
 
-	// This function will find the good contrast color
-	// based on the provided RGB values
-	// https://github.com/onury/invert-color
+	/**
+	 * This function will find the good contrast color
+	 * based on the provided RGB values
+	 * https://github.com/onury/invert-color
+	 */
 	invertColor() {
 		if (this.hex.indexOf('#') === 0) {
 			this.hex = this.hex.slice(1)
@@ -209,46 +189,36 @@ export default class Contrast {
 			const dark = this.theme.dark ?? '#000000'
 
 			this.invertedHex = threshold ? dark : light
-
-			return this
+			return
 		}
 
-		// invert color components
-		r = (255 - r).toString(16)
-		g = (255 - g).toString(16)
-		b = (255 - b).toString(16)
+		// invert color components & pad with zeros
+		r = this.padZero((255 - r).toString(16))
+		g = this.padZero((255 - g).toString(16))
+		b = this.padZero((255 - b).toString(16))
 
-		// pad each with zeros and return
-		this.invertedHex = '#' + this.padZero(r) + this.padZero(g) + this.padZero(b)
-
-		return this
+		this.invertedHex = `#${r}${g}${b}`
 	}
 
-	padZero(str, len) {
-		len = len || 2
-		let zeros = new Array(len).join('0')
-		return (zeros + str).slice(-len)
-	}
-
-	// Function to convert RGB to HEX
 	rgbToHex() {
 		this.hex = '#' + ((1 << 24) + (this.rgb.r << 16) + (this.rgb.g << 8) + this.rgb.b).toString(16).slice(1)
-		return this
 	}
 
-	// Change the color
 	setElementColor() {
 		if (this.backgroundColor) {
-			this.contentEl.style.backgroundColor = this.invertedHex
+			this.target.style.backgroundColor = this.invertedHex
 		} else {
-			this.contentEl.style.color = this.invertedHex
+			this.target.style.color = this.invertedHex
 		}
 	}
 
 	async apply() {
 		this.prepare()
 		await this.loadImage()
-		this.getAverageHEX().rgbToHex().invertColor().setElementColor()
+		this.getAverageRgb()
+		this.rgbToHex()
+		this.invertColor()
+		this.setElementColor()
 	}
 
 	resize() {
@@ -258,5 +228,36 @@ export default class Contrast {
 	launch() {
 		if (!this.once) this.resize()
 		this.apply()
+	}
+
+	//
+	//
+	//
+
+	padZero(str, len) {
+		len = len || 2
+		let zeros = new Array(len).join('0')
+		return (zeros + str).slice(-len)
+	}
+
+	getCoverScaleFactor() {
+		// This function is used to assist with background-size:cover
+		// Get the ratio of the div + the image
+		let imageRatio = this.image.width / this.image.height
+		let coverRatio = this.container.offsetWidth / this.container.offsetHeight
+		let coverHeight, coverWidth, scale
+
+		// Figure out which ratio is greater
+		if (imageRatio >= coverRatio) {
+			coverHeight = this.container.offsetHeight
+			scale = coverHeight / this.image.height
+			coverWidth = this.image.width * scale
+		} else {
+			coverWidth = this.container.offsetWidth
+			scale = coverWidth / this.image.width
+			coverHeight = this.image.height * scale
+		}
+
+		return scale
 	}
 }
