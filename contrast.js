@@ -54,7 +54,10 @@ export default class Contrast {
 
 		if (!this.canvas || !this.context) {
 			this.canvas = document.createElement('canvas')
-			this.context = this.canvas.getContext('2d', { willReadFrequently: !this.once, alpha: false })
+			this.context = this.canvas.getContext('2d', {
+				willReadFrequently: !this.once,
+				alpha: false,
+			})
 		}
 	}
 
@@ -62,23 +65,18 @@ export default class Contrast {
 	 * Loads image dynamically from the CSS background-image value
 	 */
 	async loadImage() {
-		const style = getComputedStyle(this.container)
-		let imageSrc = ''
+		const { backgroundImage } = getComputedStyle(this.container)
+		const hasQuotes = !!backgroundImage.match(/'|"/)
+		let src = ''
 
-		// Find css background-image property and check whether it has url wrapped
-		// in "" or '' or without quotes, then extract it
-		if (style.backgroundImage.indexOf('url') != -1) {
-			let startOfString, endOfString
-			if (style.backgroundImage.indexOf("'") > -1 || style.backgroundImage.indexOf('"') > -1) {
-				startOfString = 5
-				endOfString = style.backgroundImage.indexOf(')') - 1
-			} else {
-				startOfString = 4
-				endOfString = style.backgroundImage.indexOf(')')
-			}
-			imageSrc = style.backgroundImage.slice(startOfString, endOfString)
+		if (!backgroundImage.includes('url')) {
+			throw 'Check your element styles. Is the background-image property correctly ?'
+		}
+
+		if (hasQuotes) {
+			src = backgroundImage.slice(5, backgroundImage.indexOf(')') - 1)
 		} else {
-			console.log("Check your element styles. Looks like you haven't set the background-image property correctly.")
+			src = backgroundImage.slice(4, backgroundImage.indexOf(')'))
 		}
 
 		await new Promise((resolve, reject) => {
@@ -86,7 +84,7 @@ export default class Contrast {
 			this.image.crossOrigin = 'anonymous'
 			this.image.onload = resolve
 			this.image.onerror = reject
-			this.image.src = imageSrc
+			this.image.src = src
 		})
 	}
 
@@ -97,64 +95,53 @@ export default class Contrast {
 	 */
 	getAverageRgb() {
 		if (!this.context) {
-			console.log('CONTEXT UNDEFINED')
+			console.log('Context undefined')
 			return
 		}
 
-		let revScale
+		const { top, left, width, height } = this.targetBox
+		let sx, sy, sw, sh
+		let imageData
 
-		if (this.backgroundSize == 'cover') {
-			// Call the function to get the current scale factor of the cover property
-			revScale = this.getCoverScaleFactor()
-
-			// Let's draw the area of the image behind the text (contentEL)
-			this.context.drawImage(
-				this.image,
-				this.targetBox.left / revScale,
-				this.targetBox.top / revScale,
-				this.targetBox.width / revScale,
-				this.targetBox.height / revScale,
-				0,
-				0,
-				this.targetBox.width,
-				this.targetBox.height
-			)
-		} else {
-			// Let's find the reverse scale factor of the image
-			// so we can multiply our bounding box coordinates by it
-			revScale = this.image.naturalWidth / this.container.clientWidth
-
-			// Let's draw the area of the image behind the text (contentEL)
-			this.context.drawImage(
-				this.image,
-				this.targetBox.left * revScale,
-				this.targetBox.top * revScale,
-				this.targetBox.width * revScale,
-				this.targetBox.height * revScale,
-				0,
-				0,
-				this.targetBox.width,
-				this.targetBox.height
-			)
+		if (this.backgroundSize === 'cover') {
+			const scale = this.getBackgroundCoverScale()
+			sx = left / scale
+			sy = top / scale
+			sw = width / scale
+			sh = height / scale
 		}
 
+		if (this.backgroundSize === 'contain') {
+			// Let's find the reverse scale factor of the image
+			// so we can multiply our bounding box coordinates by it
+			const scale = this.image.naturalWidth / this.container.clientWidth
+			sx = left * scale
+			sy = top * scale
+			sw = width * scale
+			sh = height * scale
+		}
+
+		// Let's draw the area of the image behind the text
+		this.context.drawImage(this.image, sx, sy, sw, sh, 0, 0, width, height)
+
 		try {
-			this.data = this.context.getImageData(0, 0, this.targetBox.width, this.targetBox.height)
+			imageData = this.context.getImageData(0, 0, width, height)
 		} catch (e) {
 			// security error, img on diff domain
 			console.log('Make sure the image is hosted on the same domain')
 			return
 		}
 
-		this.length = this.data.data.length
-
-		let i = -4
+		const datalength = imageData.data.length
+		const step = 4 * this.blockSize
 		let count = 0
-		while ((i += this.blockSize * 4) < this.length) {
-			++count
-			this.rgb.r += this.data.data[i]
-			this.rgb.g += this.data.data[i + 1]
-			this.rgb.b += this.data.data[i + 2]
+		let index = 0
+
+		for (; index < datalength; index += step) {
+			this.rgb.r += imageData.data[index]
+			this.rgb.g += imageData.data[index + 1]
+			this.rgb.b += imageData.data[index + 2]
+			count++
 		}
 
 		// ~~ used to floor values
@@ -169,25 +156,25 @@ export default class Contrast {
 	 * https://github.com/onury/invert-color
 	 */
 	invertColor() {
-		if (this.hex.indexOf('#') === 0) {
-			this.hex = this.hex.slice(1)
-		}
+		let hex = this.hex.replace('#', '')
 
 		// convert 3-digit hex to 6-digits.
-		if (this.hex.length === 3) {
-			this.hex = this.hex[0] + this.hex[0] + this.hex[1] + this.hex[1] + this.hex[2] + this.hex[2]
+		if (hex.length === 3) {
+			const [r, g, b] = hex
+			hex = r + r + g + g + b + b
 		}
 
-		if (this.hex.length !== 6) {
+		if (hex.length !== 6) {
 			throw new Error('Invalid HEX color.')
 		}
 
-		let r = parseInt(this.hex.slice(0, 2), 16),
-			g = parseInt(this.hex.slice(2, 4), 16),
-			b = parseInt(this.hex.slice(4, 6), 16)
+		let r = parseInt(hex.slice(0, 2), 16),
+			g = parseInt(hex.slice(2, 4), 16),
+			b = parseInt(hex.slice(4, 6), 16)
 
 		if (this.theme) {
-			const threshold = r * 0.299 + g * 0.587 + b * 0.114 > 186 // https://stackoverflow.com/a/3943023/112731
+			// https://stackoverflow.com/a/3943023/112731
+			const threshold = r * 0.299 + g * 0.587 + b * 0.114 > 186
 			const light = this.theme.light ?? '#FFFFFF'
 			const dark = this.theme.dark ?? '#000000'
 
@@ -204,7 +191,11 @@ export default class Contrast {
 	}
 
 	rgbToHex() {
-		this.hex = '#' + ((1 << 24) + (this.rgb.r << 16) + (this.rgb.g << 8) + this.rgb.b).toString(16).slice(1)
+		const { r, g, b } = this.rgb
+		const decimal = (1 << 24) + (r << 16) + (g << 8) + b
+		const hex = decimal.toString(16).slice(1)
+
+		this.hex = '#' + hex
 	}
 
 	setElementColor() {
@@ -248,8 +239,7 @@ export default class Contrast {
 		return (zeros + str).slice(-len)
 	}
 
-	getCoverScaleFactor() {
-		// This function is used to assist with background-size:cover
+	getBackgroundCoverScale() {
 		// Get the ratio of the div + the image
 		let imageRatio = this.image.width / this.image.height
 		let coverRatio = this.container.offsetWidth / this.container.offsetHeight
