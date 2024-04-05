@@ -70,7 +70,7 @@ export default class Contrast {
 		let src = ''
 
 		if (!backgroundImage.includes('url')) {
-			throw 'Check your element styles. Is the background-image property correctly ?'
+			throw 'Check your element styles. Is the background-image property set correctly ?'
 		}
 
 		if (hasQuotes) {
