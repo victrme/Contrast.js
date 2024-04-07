@@ -1,5 +1,5 @@
 {
-	"name": "contrast-js",
+	"name": "@victr/contrast.js",
 	"version": "1.1.4",
 	"description": "Contrast.js is a tiny library with no dependencies that adds responsiveness to the color or background attributes of DOM elements based on the section of background image behind the target element. The library analyzes the background behind the bounding box of the target element by getting the average RGB values of pixels in the sub-rectangle behind the element and finding the best contrasting color. In simple words, never worry about your color matching the background image again! No more countless media queries.",
 	"author": "Misha Petrov",
@@ -20,7 +20,8 @@
 		"build": "tsc"
 	},
 	"files": [
-		"./contrast.js"
+		"./contrast.js",
+		"./contrast.d.ts"
 	],
 	"exports": {
 		".": {
