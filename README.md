@@ -30,13 +30,13 @@ Whether you use this project, have learned something from it, or just like it, p
 Contrast.js can be installed with [`npm`](https://www.npmjs.com/package/contrast-js)
 
 ```sh
-$ npm install contrast-js
+$ npm install @victr/contrast.js
 ```
 
 …and include the file in your script
 
 ```js
-import Contrast from 'contrast-js'
+import Contrast from '@victr/contrast.js'
 ```
 
 ## Run
@@ -44,23 +44,23 @@ import Contrast from 'contrast-js'
 Add an element that has the background image and a target element, like this:
 
 ```html
-<div class="contrast-bg">
-  <h1 class="contrast-el">Resize and watch my color change</h1>
+<div id="background">
+  <h1 id="title">Resize and watch my color change</h1>
 </div>
 ```
 
 To run Contrast.js, create new instance of Contrast class, add the background and target selectors, and invoke launch() method on it.
 
 ```javascript
-import Contrast from 'contrast-js'
+import Contrast from '@victr/contrast.js'
 
-new Contrast('.contrast-bg', '.contrast-el').launch()
+new Contrast('#background', '#title').launch()
 ```
 
 Contrast also accepts options:
 
 ```javascript
-import Contrast from 'contrast-js'
+import Contrast from '@victr/contrast.js'
 
 const contrast = new Contrast(
   ".background",   // The CSS selector for the element containing the image
