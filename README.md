@@ -1,33 +1,12 @@
 # ![Contrast.js logo](https://raw.githubusercontent.com/victrme/Contrast.js/master/assets/logo.png)
 
-This is a ESM port of Contrast.js which is a tiny library with no dependencies that adds responsiveness to the color or background attributes of DOM elements based on the section of background image behind the target element.
-The library analyzes the background behind the bounding box of the target element by getting the average RGB values of pixels in the sub-rectangle behind the element and finding the best contrasting color.
+This is a ESM port of Contrast.js, a tiny library with no dependencies that dynamically updates the contrast of given text based on its background image. Never worry about your color matching the background image again! No more countless media queries.
 
-In simple words, never worry about your color matching the background image again! No more countless media queries.
-
-![GIF demo](img/demo-2.gif)
-
-## Buy mishka a coffee
-
-Whether you use this project, have learned something from it, or just like it, please consider supporting it by buying mishka a coffee, so that he can dedicate more time on open-source projects like this :)
-
-<a href="https://www.buymeacoffee.com/mishka" target="_blank"><img src="https://www.buymeacoffee.com/assets/img/guidelines/download-assets-sm-1.svg" alt="Buy Me A Coffee" style="height: auto !important;width: auto !important;" ></a>
-
-## Features
-
--   Vanilla JS - no jQuery or any other dependencies
--   Very simple setup/activation
--   Support for responsive font color
--   Support for responsive div background color
--   Support for background-size: cover;
--   Support for background-size: 100%;
--   Option to add custom colors to switch between (Light/Dark)
--   Option to change activation class names
--   Option to turn on/off activation on window resize event
+![GIF demo](assets/demo.gif)
 
 ## Install
 
-Contrast.js can be installed with [`npm`](https://www.npmjs.com/package/contrast-js)
+Contrast.js can be installed with [`npm`](https://www.npmjs.com/package/@victr/contrast.js)
 
 ```sh
 $ npm install @victr/contrast.js
@@ -49,7 +28,7 @@ Add an element that has the background image and a target element, like this:
 </div>
 ```
 
-To run Contrast.js, create new instance of Contrast class, add the background and target selectors, and invoke launch() method on it.
+Create new instance of the Contrast class, add the background and target selectors, and invoke launch() method on it.
 
 ```javascript
 import Contrast from '@victr/contrast.js'
@@ -78,6 +57,24 @@ const contrast = new Contrast(
 
 contrast.launch();
 ```
+
+## Features
+
+-   Vanilla JS - no jQuery or any other dependencies
+-   Very simple setup/activation
+-   Support for responsive font color
+-   Support for responsive div background color
+-   Support for background-size: cover;
+-   Support for background-size: 100%;
+-   Option to add custom colors to switch between (Light/Dark)
+-   Option to change activation class names
+-   Option to turn on/off activation on window resize event
+
+## Buy mishka a coffee
+
+Whether you use this project, have learned something from it, or just like it, please consider supporting it by buying mishka a coffee, so that he can dedicate more time on open-source projects like this :)
+
+<a href="https://www.buymeacoffee.com/mishka" target="_blank"><img src="https://www.buymeacoffee.com/assets/img/guidelines/download-assets-sm-1.svg" alt="Buy Me A Coffee" style="height: auto !important;width: auto !important;" ></a>
 
 ## What's not there yet
 
