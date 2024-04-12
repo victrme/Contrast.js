@@ -14,7 +14,7 @@
 			}
 
 			body {
-				max-width: 700px;
+				max-width: 900px;
 				margin: auto;
 				font-size: 14px;
 				font-family: monospace;
@@ -60,8 +60,8 @@
 			background image again! No more countless media queries.
 		</p>
 
-		<section class="contrast-bg">
-			<h2 class="contrast-el">Resize and watch my color change</h2>
+		<section>
+			<h2>Resize and watch my color change</h2>
 		</section>
 
 		<footer>
@@ -74,11 +74,6 @@
 	<script type="module">
 		import Contrast from './contrast.js'
 
-		new Contrast('.contrast-bg', '.contrast-el', {
-			// colors: {
-			// 	light: '#bddfe0',
-			// 	dark: '#334054',
-			// }
-		}).launch()
+		new Contrast('section', 'h2').launch()
 	</script>
 </html>
