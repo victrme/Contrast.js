@@ -34,25 +34,19 @@ export default class Contrast {
 		this.backgroundSize = options.backgroundSize ?? 'cover'
 		this.backgroundColor = options.backgroundColor ?? false
 
-		this.rgb = { r: 0, g: 0, b: 0 }
 		this.blockSize = 5 // only check every 5 pixels
-		this.defaultRGB = { r: 0, g: 0, b: 0 } // for non-supporting envs
-		this.hex
-		this.invertedHex
 		this.canvas
 		this.context
 		this.image
-		this.target
-		this.targetBox
 		this.container
 		this.containerBox
+		this.targetNodes
 	}
 
 	prepare() {
-		this.target = document.querySelector(this.targetSelector)
-		this.targetBox = document.querySelector(this.targetSelector).getBoundingClientRect()
+		this.targetNodes = document.querySelectorAll(this.targetSelector)
 		this.container = document.querySelector(this.containerSelector)
-		this.containerBox = document.querySelector(this.containerSelector).getBoundingClientRect()
+		this.containerBox = this.container.getBoundingClientRect()
 
 		if (!this.canvas || !this.context) {
 			this.canvas = document.createElement('canvas')
@@ -94,14 +88,15 @@ export default class Contrast {
 	 * Determines the average color of the section of the
 	 * background image right under the supplied element
 	 * using the target element's bounding box
+	 * @param {DOMRect} targetBox
+	 * @returns {{r: number, g: number, b: number}}
 	 */
-	getAverageRgb() {
+	getAverageRgb(targetBox) {
 		if (!this.context) {
-			console.log('Context undefined')
-			return
+			throw 'Context undefined'
 		}
 
-		let { top, left, width, height } = this.targetBox
+		let { top, left, width, height } = targetBox
 		let sx, sy, sw, sh
 		let imageData
 
@@ -128,40 +123,38 @@ export default class Contrast {
 
 		// Let's draw the area of the image behind the text
 		this.context.drawImage(this.image, sx, sy, sw, sh, 0, 0, width, height)
-
-		try {
-			imageData = this.context.getImageData(0, 0, width, height)
-		} catch (e) {
-			// security error, img on diff domain
-			console.log('Make sure the image is hosted on the same domain')
-			return
-		}
+		imageData = this.context.getImageData(0, 0, width, height)
 
 		const datalength = imageData.data.length
 		const step = 4 * this.blockSize
+		let [r, g, b] = [0, 0, 0]
 		let count = 0
 		let index = 0
 
 		for (; index < datalength; index += step) {
-			this.rgb.r += imageData.data[index]
-			this.rgb.g += imageData.data[index + 1]
-			this.rgb.b += imageData.data[index + 2]
+			r += imageData.data[index]
+			g += imageData.data[index + 1]
+			b += imageData.data[index + 2]
 			count++
 		}
 
 		// ~~ used to floor values
-		this.rgb.r = ~~(this.rgb.r / count)
-		this.rgb.g = ~~(this.rgb.g / count)
-		this.rgb.b = ~~(this.rgb.b / count)
+		r = ~~(r / count)
+		g = ~~(g / count)
+		b = ~~(b / count)
+
+		return { r, g, b }
 	}
 
 	/**
 	 * This function will find the good contrast color
 	 * based on the provided RGB values
 	 * https://github.com/onury/invert-color
+	 * @param {{r: number, g: number, b: number}} rgb
+	 * @returns {string}
 	 */
-	invertColor() {
-		let hex = this.hex.replace('#', '')
+	invertColor(rgb) {
+		const hex = this.rgbToHex(rgb)
 
 		// convert 3-digit hex to 6-digits.
 		if (hex.length === 3) {
@@ -170,7 +163,7 @@ export default class Contrast {
 		}
 
 		if (hex.length !== 6) {
-			throw new Error('Invalid HEX color.')
+			throw 'Invalid HEX color.'
 		}
 
 		let r = parseInt(hex.slice(0, 2), 16),
@@ -183,8 +176,7 @@ export default class Contrast {
 			const light = this.theme.light ?? '#FFFFFF'
 			const dark = this.theme.dark ?? '#000000'
 
-			this.invertedHex = threshold ? dark : light
-			return
+			return threshold ? dark : light
 		}
 
 		// invert color components & pad with zeros
@@ -192,45 +184,52 @@ export default class Contrast {
 		g = this.padZero((255 - g).toString(16))
 		b = this.padZero((255 - b).toString(16))
 
-		this.invertedHex = `#${r}${g}${b}`
+		return `#${r}${g}${b}`
 	}
 
-	rgbToHex() {
-		const { r, g, b } = this.rgb
+	/**
+	 * @param {{r: number, g: number, b: number}} rgb
+	 * @returns {string}
+	 */
+	rgbToHex(rgb) {
+		const { r, g, b } = rgb
 		const decimal = (1 << 24) + (r << 16) + (g << 8) + b
 		const hex = decimal.toString(16).slice(1)
-
-		this.hex = '#' + hex
+		return hex
 	}
 
-	setElementColor() {
+	/**
+	 * @param {Element} target
+	 * @param {string} hex
+	 * @returns {void}
+	 */
+	setElementColor(target, hex) {
 		if (this.backgroundColor) {
-			this.target.style.backgroundColor = this.invertedHex
+			target.style.backgroundColor = hex
 		} else {
-			this.target.style.color = this.invertedHex
+			target.style.color = hex
 		}
 	}
 
-	resize() {
-		window.addEventListener('resize', () => {
-			this.prepare()
-			this.getAverageRgb()
-			this.rgbToHex()
-			this.invertColor()
-			this.setElementColor()
-		})
+	apply() {
+		for (const target of this.targetNodes) {
+			const rect = target.getBoundingClientRect()
+			const rgb = this.getAverageRgb(rect)
+			const hex = this.invertColor(rgb)
+			this.setElementColor(target, hex)
+		}
 	}
 
 	async launch() {
 		this.prepare()
 		await this.loadImage()
-		this.getAverageRgb()
-		this.rgbToHex()
-		this.invertColor()
-		this.setElementColor()
+		this.apply()
 
 		if (!this.once) {
-			this.resize()
+			window.addEventListener('resize', () => {
+				this.prepare()
+				this.apply()
+			})
 		}
 	}
 
