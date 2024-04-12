@@ -8,27 +8,67 @@
 		<link rel="icon" href="./assets/logo.png" type="image/png" />
 
 		<style>
+			:root {
+				background: #fec;
+				color: #554d42;
+			}
+
 			body {
-				margin: 0;
-				font-family: 'Times New Roman', Times, serif;
-				font-size: 24px;
+				max-width: 700px;
+				margin: auto;
+				font-size: 14px;
+				font-family: monospace;
+				line-height: 1.5;
+			}
+
+			img {
+				display: block;
+				margin: 2em auto;
 			}
 
 			section {
 				display: flex;
 				align-items: center;
 				justify-content: center;
-				height: 100vh;
+				margin: 2em 0;
+				height: 80vh;
+				font-size: 20px;
 				background-image: url('./assets/background.jpg');
 				background-size: cover;
+				font-family: 'Times New Roman', Times, serif;
+			}
+
+			footer {
+				display: block;
+				text-align: center;
+				margin-bottom: 4em;
+			}
+
+			footer a {
+				color: inherit;
+				text-decoration: underline;
 			}
 		</style>
 	</head>
 
 	<body>
+		<img src="./assets/logo.png" alt="logo" width="200" />
+
+		<p>
+			Contrast.js is a tiny library with no dependencies that dynamically updates the contrast
+			of given text based on its background image. Never worry about your color matching the
+			background image again! No more countless media queries.
+		</p>
+
 		<section class="contrast-bg">
-			<h1 class="contrast-el">Resize and watch my color change</h1>
+			<h2 class="contrast-el">Resize and watch my color change</h2>
 		</section>
+
+		<footer>
+			Use on <a href="https://www.npmjs.com/package/@victr/contrast.js">npm</a>, look at
+			<a href="https://github.com/victrme/Contrast.js">this fork</a> or their
+			<a href="https://github.com/kombuchapunk/Contrast.js">original work</a>
+		</footer>
 	</body>
 
 	<script type="module">
