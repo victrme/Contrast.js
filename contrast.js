@@ -1,8 +1,3 @@
-// It is inspired by https://stackoverflow.com/questions/2541481/get-average-color-of-image-via-javascript
-// and the following npm package https://github.com/onury/invert-color
-// As well as CS50's image filter project and
-// https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/drawImage
-
 /**
  * This is an example of how it's possible to dynamically change the font color
  * based on the page or element background, including responsive images.
@@ -10,6 +5,11 @@
  * (You can also set bw value to true like invertColor(hex, true) and in this case
  * the font color will switch between black/white or any color pair you set based on
  * the background behind the target element)
+ *
+ * It is inspired by https://stackoverflow.com/questions/2541481/get-average-color-of-image-via-javascript
+ * and the following npm package https://github.com/onury/invert-color
+ * As well as CS50's image filter project and
+ * https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/drawImage
  *
  * @author devmishka
  * @license MIT
@@ -45,12 +45,14 @@ export default class Contrast {
 		this.target
 		this.targetBox
 		this.container
+		this.containerBox
 	}
 
 	prepare() {
 		this.target = document.querySelector(this.targetSelector)
 		this.targetBox = document.querySelector(this.targetSelector).getBoundingClientRect()
 		this.container = document.querySelector(this.containerSelector)
+		this.containerBox = document.querySelector(this.containerSelector).getBoundingClientRect()
 
 		if (!this.canvas || !this.context) {
 			this.canvas = document.createElement('canvas')
@@ -99,9 +101,12 @@ export default class Contrast {
 			return
 		}
 
-		const { top, left, width, height } = this.targetBox
+		let { top, left, width, height } = this.targetBox
 		let sx, sy, sw, sh
 		let imageData
+
+		top = top - this.containerBox.top
+		left = left - this.containerBox.left
 
 		if (this.backgroundSize === 'cover') {
 			const scale = this.getBackgroundCoverScale()
