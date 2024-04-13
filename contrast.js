@@ -34,7 +34,6 @@ export default class Contrast {
 		this.backgroundSize = options.backgroundSize ?? 'cover'
 		this.backgroundColor = options.backgroundColor ?? false
 
-		this.blockSize = 5 // only check every 5 pixels
 		this.canvas
 		this.context
 		this.image
@@ -43,22 +42,9 @@ export default class Contrast {
 		this.targetNodes
 	}
 
-	prepare() {
-		this.targetNodes = document.querySelectorAll(this.targetSelector)
-		this.container = document.querySelector(this.containerSelector)
-		this.containerBox = this.container.getBoundingClientRect()
-
-		if (!this.canvas || !this.context) {
-			this.canvas = document.createElement('canvas')
-			this.context = this.canvas.getContext('2d', {
-				willReadFrequently: !this.once,
-				alpha: false,
-			})
-		}
-	}
-
 	/**
 	 * Loads image dynamically from the CSS background-image value
+	 * @private
 	 */
 	async loadImage() {
 		const { backgroundImage } = getComputedStyle(this.container)
@@ -90,6 +76,7 @@ export default class Contrast {
 	 * using the target element's bounding box
 	 * @param {DOMRect} targetBox
 	 * @returns {{r: number, g: number, b: number}}
+	 * @private
 	 */
 	getAverageRgb(targetBox) {
 		if (!this.context) {
@@ -125,8 +112,9 @@ export default class Contrast {
 		this.context.drawImage(this.image, sx, sy, sw, sh, 0, 0, width, height)
 		imageData = this.context.getImageData(0, 0, width, height)
 
+		const blockSize = 5
 		const datalength = imageData.data.length
-		const step = 4 * this.blockSize
+		const step = 4 * blockSize
 		let [r, g, b] = [0, 0, 0]
 		let count = 0
 		let index = 0
@@ -152,6 +140,7 @@ export default class Contrast {
 	 * https://github.com/onury/invert-color
 	 * @param {{r: number, g: number, b: number}} rgb
 	 * @returns {string}
+	 * @private
 	 */
 	invertColor(rgb) {
 		const hex = this.rgbToHex(rgb)
@@ -190,6 +179,7 @@ export default class Contrast {
 	/**
 	 * @param {{r: number, g: number, b: number}} rgb
 	 * @returns {string}
+	 * @private
 	 */
 	rgbToHex(rgb) {
 		const { r, g, b } = rgb
@@ -202,6 +192,7 @@ export default class Contrast {
 	 * @param {Element} target
 	 * @param {string} hex
 	 * @returns {void}
+	 * @private
 	 */
 	setElementColor(target, hex) {
 		if (this.backgroundColor) {
@@ -211,7 +202,24 @@ export default class Contrast {
 		}
 	}
 
-	apply() {
+	/**
+	 * You can manually update the contrast of the text defined during initialization.
+	 *
+	 * @example
+	 * const contrast = new Contrast('#background', 'h1').init()
+	 * const button = document.querySelector('#some-button')
+	 *
+	 * button.addEventListener('click', () => {
+	 *     contrast.update()
+	 * })
+	 */
+	update() {
+		if (!this.context) {
+			throw 'Contrast needs to be initialized first'
+		}
+
+		this.containerBox = this.container.getBoundingClientRect()
+
 		for (const target of this.targetNodes) {
 			const rect = target.getBoundingClientRect()
 			const rgb = this.getAverageRgb(rect)
@@ -220,29 +228,39 @@ export default class Contrast {
 		}
 	}
 
-	async launch() {
-		this.prepare()
+	/**
+	 * This creates a canvas and load the background image.
+	 * If "once" is specified, no resize eventListeners are added to window
+	 */
+	async init() {
+		this.targetNodes = document.querySelectorAll(this.targetSelector)
+		this.container = document.querySelector(this.containerSelector)
+		this.canvas = document.createElement('canvas')
+		this.context = this.canvas.getContext('2d', {
+			willReadFrequently: !this.once,
+			alpha: false,
+		})
+
 		await this.loadImage()
-		this.apply()
+		this.update()
 
 		if (!this.once) {
-			window.addEventListener('resize', () => {
-				this.prepare()
-				this.apply()
-			})
+			window.addEventListener('resize', () => this.update())
 		}
 	}
 
-	//
-	//
-	//
-
+	/**
+	 * @private
+	 */
 	padZero(str, len) {
 		len = len || 2
 		let zeros = new Array(len).join('0')
 		return (zeros + str).slice(-len)
 	}
 
+	/**
+	 * @private
+	 */
 	getBackgroundCoverScale() {
 		// Get the ratio of the div + the image
 		let imageRatio = this.image.width / this.image.height
