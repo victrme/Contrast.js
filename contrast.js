@@ -43,6 +43,55 @@ export default class Contrast {
 	}
 
 	/**
+	 * This creates a canvas and load the background image.
+	 * If "once" is specified, no resize eventListeners are added to window
+	 */
+	async init() {
+		this.targetNodes = document.querySelectorAll(this.targetSelector)
+		this.container = document.querySelector(this.containerSelector)
+		this.canvas = document.createElement('canvas')
+		this.context = this.canvas.getContext('2d', {
+			willReadFrequently: !this.once,
+			alpha: false,
+		})
+
+		await this.loadImage()
+		this.update()
+
+		if (!this.once) {
+			window.addEventListener('resize', () => this.update())
+		}
+	}
+
+	/**
+	 * You can manually update the contrast of the text defined during initialization.
+	 *
+	 * @example
+	 * const contrast = new Contrast('#background', 'h1').init()
+	 * const button = document.querySelector('#some-button')
+	 *
+	 * button.addEventListener('click', () => {
+	 *     contrast.update()
+	 * })
+	 */
+	update() {
+		if (!this.context) {
+			throw 'Contrast needs to be initialized first'
+		}
+
+		this.containerBox = this.container.getBoundingClientRect()
+
+		for (const target of this.targetNodes) {
+			const rect = target.getBoundingClientRect()
+			const rgb = this.getAverageRgb(rect)
+			const hex = this.invertColor(rgb)
+			this.setElementColor(target, hex)
+		}
+	}
+
+	//
+
+	/**
 	 * Loads image dynamically from the CSS background-image value
 	 * @private
 	 */
@@ -199,53 +248,6 @@ export default class Contrast {
 			target.style.backgroundColor = hex
 		} else {
 			target.style.color = hex
-		}
-	}
-
-	/**
-	 * You can manually update the contrast of the text defined during initialization.
-	 *
-	 * @example
-	 * const contrast = new Contrast('#background', 'h1').init()
-	 * const button = document.querySelector('#some-button')
-	 *
-	 * button.addEventListener('click', () => {
-	 *     contrast.update()
-	 * })
-	 */
-	update() {
-		if (!this.context) {
-			throw 'Contrast needs to be initialized first'
-		}
-
-		this.containerBox = this.container.getBoundingClientRect()
-
-		for (const target of this.targetNodes) {
-			const rect = target.getBoundingClientRect()
-			const rgb = this.getAverageRgb(rect)
-			const hex = this.invertColor(rgb)
-			this.setElementColor(target, hex)
-		}
-	}
-
-	/**
-	 * This creates a canvas and load the background image.
-	 * If "once" is specified, no resize eventListeners are added to window
-	 */
-	async init() {
-		this.targetNodes = document.querySelectorAll(this.targetSelector)
-		this.container = document.querySelector(this.containerSelector)
-		this.canvas = document.createElement('canvas')
-		this.context = this.canvas.getContext('2d', {
-			willReadFrequently: !this.once,
-			alpha: false,
-		})
-
-		await this.loadImage()
-		this.update()
-
-		if (!this.once) {
-			window.addEventListener('resize', () => this.update())
 		}
 	}
 
