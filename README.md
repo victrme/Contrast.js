@@ -24,16 +24,16 @@ Add an element that has the background image and a target element, like this:
 
 ```html
 <div id="background">
-  <h1 id="title">Resize and watch my color change</h1>
+	<h1 id="title">Resize and watch my color change</h1>
 </div>
 ```
 
-Create new instance of the Contrast class, add the background and target selectors, and invoke launch() method on it.
+Create new instance of the Contrast class, add the background and target selectors, and invoke `init()` method on it.
 
 ```javascript
 import Contrast from '@victr/contrast.js'
 
-new Contrast('#background', '#title').launch()
+new Contrast('#background', '#title').init()
 ```
 
 Contrast also accepts options:
@@ -41,34 +41,29 @@ Contrast also accepts options:
 ```javascript
 import Contrast from '@victr/contrast.js'
 
-const contrast = new Contrast(
-  ".background",   // The CSS selector for the element containing the image
-  ".target",       // The CSS selector for the target element
-  {
-    once: true,               // The module runs only once; on window resize by default
-    backgroundSize: "cover",  // "cover" or "contain" based on the background-size property in css
-    backgroundColor: false,   // Apply contrast to background color; font color by default
-    theme: {                  // If you want to prebuild light & dark colors
-      light: "#bddfe0",       // Light color HEX
-      dark: "#334054"         // Dark color HEX
+const options = {
+    once: true,              // The module runs only once; on window resize by default
+    backgroundSize: 'cover', // "cover" or "contain" based on the background-size property in css
+    backgroundColor: true,   // Apply contrast to background color; font color by default
+    theme: {                 // If you want to prebuild light & dark colors
+      light: '#bddfe0',      // Light color HEX
+      dark: '#334054',       // Dark color HEX
     },
-  }
-);
+},
 
-contrast.launch();
+new Contrast('div', 'h1', options).init()
 ```
 
-## Features
+You can also manually update the contrast by invoking `update()` after initialization.
 
--   Vanilla JS - no jQuery or any other dependencies
--   Very simple setup/activation
--   Support for responsive font color
--   Support for responsive div background color
--   Support for background-size: cover;
--   Support for background-size: 100%;
--   Option to add custom colors to switch between (Light/Dark)
--   Option to change activation class names
--   Option to turn on/off activation on window resize event
+```js
+const contrast = new Contrast('div', 'h1').init()
+const button = document.querySelector('#some-button')
+
+button.addEventListener('click', () => {
+    contrast.update()
+})
+```
 
 ## Buy mishka a coffee
 
@@ -76,14 +71,9 @@ Whether you use this project, have learned something from it, or just like it, p
 
 <a href="https://www.buymeacoffee.com/mishka" target="_blank"><img src="https://www.buymeacoffee.com/assets/img/guidelines/download-assets-sm-1.svg" alt="Buy Me A Coffee" style="height: auto !important;width: auto !important;" ></a>
 
-## What's not there yet
-
--   Currently the library supports changing color for only ONE element.
--   background-position isn't supported yet
-
 ## Proud to mention
 
-Created at <a style="color:#52337c;" href="https://fictiontribe.com">Fiction Tribe ®</a> in Portland, OR
+Created at [Fiction Tribe ®](https://fictiontribe.com) in Portland, OR
 
 ## License
 
