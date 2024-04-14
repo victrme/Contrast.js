@@ -18,21 +18,33 @@ export default class Contrast {
 	/**
 	 * @param {string} container - A CSS selector for the element containing the image
 	 * @param {string} target - A CSS selector for the target element
-	 * @param {Object} options
-	 * @param {boolean} options.once - The module runs only once; on window resize by default
-	 * @param {boolean} options.backgroundColor - Apply contrast to background color; font color by default
-	 * @param {"cover" | "contain"} options.backgroundSize - Based on the background-size property in css
-	 * @param {Object} options.theme - If you want to prebuild light & dark colors
-	 * @param {string} options.theme.light - Light color HEX
-	 * @param {string} options.theme.dark - Dark color HEX
+	 * @param {Object} [options]
+	 * @param {boolean} [options.once] - The module runs only once; on window resize by default
+	 * @param {boolean} [options.backgroundColor] - Apply contrast to background color; font color by default
+	 * @param {"cover" | "contain"} [options.backgroundSize] - Based on the background-size property in css
+	 * @param {Object} [options.theme] - If you want to prebuild light & dark colors
+	 * @param {string} [options.theme.light] - Light color HEX
+	 * @param {string} [options.theme.dark] - Dark color HEX
 	 */
-	constructor(container, target, options = {}) {
+	constructor(
+		container,
+		target,
+		options = {
+			once: false,
+			backgroundSize: 'cover',
+			backgroundColor: false,
+			theme: {
+				light: '#ffffff',
+				dark: '#000000',
+			},
+		},
+	) {
 		this.containerSelector = container
 		this.targetSelector = target
 		this.theme = options.theme
-		this.once = options.once ?? false
-		this.backgroundSize = options.backgroundSize ?? 'cover'
-		this.backgroundColor = options.backgroundColor ?? false
+		this.once = options.once
+		this.backgroundSize = options.backgroundSize
+		this.backgroundColor = options.backgroundColor
 
 		this.canvas
 		this.context
