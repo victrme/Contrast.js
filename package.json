@@ -1,6 +1,6 @@
 {
 	"name": "@victr/contrast.js",
-	"version": "1.2.9",
+	"version": "2.2.9",
 	"description": "Contrast.js dynamically updates the contrast of given text based on its background image.",
 	"author": "Misha Petrov",
 	"license": "MIT",
