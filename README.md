@@ -24,7 +24,7 @@ Add an element that has the background image and a target element, like this:
 
 ```html
 <div id="background">
-	<h1 id="title">Resize and watch my color change</h1>
+  <h1 id="title">Resize and watch my color change</h1>
 </div>
 ```
 
@@ -42,16 +42,16 @@ Contrast also accepts options:
 import Contrast from '@victr/contrast.js'
 
 const options = {
-    once: true,              // The module runs only once; on window resize by default
-    backgroundSize: 'cover', // "cover" or "contain" based on the background-size property in css
-    backgroundColor: true,   // Apply contrast to background color; font color by default
-    theme: {                 // If you want to prebuild light & dark colors
-      light: '#bddfe0',      // Light color HEX
-      dark: '#334054',       // Dark color HEX
-    },
-},
+  once: true,                  // The module runs only once; on window resize by default
+  targetColor: 'background',   // Apply color to "background", "font", or "var"; font by default
+  backgroundSize: 'cover',     // "cover" or "contain" based on the background-size property in css
+  theme: {                     // If you want to prebuild light & dark colors
+    light: '#bddfe0',          // Light color HEX
+    dark: '#334054',           // Dark color HEX
+  },
+}
 
-new Contrast('div', 'h1', options).init()
+new Contrast('div', 'h1').init(options)
 ```
 
 You can also manually update the contrast by invoking `update()` after initialization.
@@ -61,7 +61,7 @@ const contrast = new Contrast('div', 'h1').init()
 const button = document.querySelector('#some-button')
 
 button.addEventListener('click', () => {
-    contrast.update()
+  contrast.update()
 })
 ```
 

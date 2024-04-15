@@ -16,37 +16,43 @@
  */
 export default class Contrast {
 	/**
+	 * @typedef {Object} Options
+	 * @property {boolean} once - The module runs only once; on window resize by default
+	 * @property {"cover" | "contain"} backgroundSize - Based on the background-size property in css
+	 * @property {"background" | "font" | "var"} targetColor - Apply contrast to target; font-color by default
+	 * @property {Object} theme - If you want to prebuild light & dark colors
+	 * @property {string} theme.light - Light color HEX
+	 * @property {string} theme.dark - Dark color HEX
+	 */
+
+	/**
 	 * @param {string} container - A CSS selector for the element containing the image
 	 * @param {string} target - A CSS selector for the target element
-	 * @param {Object} [options]
-	 * @param {boolean} [options.once] - The module runs only once; on window resize by default
-	 * @param {boolean} [options.backgroundColor] - Apply contrast to background color; font color by default
-	 * @param {"cover" | "contain"} [options.backgroundSize] - Based on the background-size property in css
-	 * @param {Object} [options.theme] - If you want to prebuild light & dark colors
-	 * @param {string} [options.theme.light] - Light color HEX
-	 * @param {string} [options.theme.dark] - Dark color HEX
 	 */
-	constructor(container, target, options = {}) {
+	constructor(container, target) {
 		this.containerSelector = container
 		this.targetSelector = target
-		this.theme = options.theme
-		this.once = options.once
-		this.backgroundSize = options.backgroundSize
-		this.backgroundColor = options.backgroundColor
-
 		this.canvas
 		this.context
 		this.image
 		this.container
 		this.containerBox
 		this.targetNodes
+
+		/** @type {Options} */
+		this.options = {
+			once: false,
+			targetColor: 'font',
+			backgroundSize: 'cover',
+		}
 	}
 
 	/**
 	 * This creates a canvas and load the background image.
 	 * If "once" is specified, no resize eventListeners are added to window
+	 * @param {Options} [options]
 	 */
-	async init() {
+	async init(options) {
 		this.targetNodes = document.querySelectorAll(this.targetSelector)
 		this.container = document.querySelector(this.containerSelector)
 		this.canvas = document.createElement('canvas')
@@ -54,6 +60,11 @@ export default class Contrast {
 			willReadFrequently: !this.once,
 			alpha: false,
 		})
+
+		this.options = {
+			...options,
+			...this.options,
+		}
 
 		await this.loadImage()
 		this.update()
@@ -85,11 +96,9 @@ export default class Contrast {
 			const rect = target.getBoundingClientRect()
 			const rgb = this.getAverageRgb(rect)
 			const hex = this.invertColor(rgb)
-			this.setElementColor(target, hex)
+			this.setTargetColor(target, hex)
 		}
 	}
-
-	//
 
 	/**
 	 * Loads image dynamically from the CSS background-image value
@@ -139,15 +148,7 @@ export default class Contrast {
 		top = top - this.containerBox.top
 		left = left - this.containerBox.left
 
-		if (this.backgroundSize === 'cover') {
-			const scale = this.getBackgroundCoverScale()
-			sx = left / scale
-			sy = top / scale
-			sw = width / scale
-			sh = height / scale
-		}
-
-		if (this.backgroundSize === 'contain') {
+		if (this.options.backgroundSize === 'contain') {
 			// Let's find the reverse scale factor of the image
 			// so we can multiply our bounding box coordinates by it
 			const scale = this.image.naturalWidth / this.container.clientWidth
@@ -155,6 +156,12 @@ export default class Contrast {
 			sy = top * scale
 			sw = width * scale
 			sh = height * scale
+		} else {
+			const scale = this.getBackgroundCoverScale()
+			sx = left / scale
+			sy = top / scale
+			sw = width / scale
+			sh = height / scale
 		}
 
 		// Let's draw the area of the image behind the text
@@ -208,11 +215,11 @@ export default class Contrast {
 			g = parseInt(hex.slice(2, 4), 16),
 			b = parseInt(hex.slice(4, 6), 16)
 
-		if (this.theme) {
+		if (this.options.theme) {
 			// https://stackoverflow.com/a/3943023/112731
 			const threshold = r * 0.299 + g * 0.587 + b * 0.114 > 186
-			const light = this.theme.light ?? '#FFFFFF'
-			const dark = this.theme.dark ?? '#000000'
+			const light = this.options.theme.light ?? '#FFFFFF'
+			const dark = this.options.theme.dark ?? '#000000'
 
 			return threshold ? dark : light
 		}
@@ -243,11 +250,13 @@ export default class Contrast {
 	 * @returns {void}
 	 * @private
 	 */
-	setElementColor(target, hex) {
-		if (this.backgroundColor) {
-			target.style.backgroundColor = hex
-		} else {
+	setTargetColor(target, hex) {
+		if (this.options.targetColor === 'font') {
 			target.style.color = hex
+		} else if (this.options.targetColor === 'background') {
+			target.style.backgroundColor = hex
+		} else if (this.options.targetColor === 'var') {
+			target.style.setProperty('--contrast-color', hex)
 		}
 	}
 
