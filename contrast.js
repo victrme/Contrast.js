@@ -26,19 +26,7 @@ export default class Contrast {
 	 * @param {string} [options.theme.light] - Light color HEX
 	 * @param {string} [options.theme.dark] - Dark color HEX
 	 */
-	constructor(
-		container,
-		target,
-		options = {
-			once: false,
-			backgroundSize: 'cover',
-			backgroundColor: false,
-			theme: {
-				light: '#ffffff',
-				dark: '#000000',
-			},
-		},
-	) {
+	constructor(container, target, options = {}) {
 		this.containerSelector = container
 		this.targetSelector = target
 		this.theme = options.theme
